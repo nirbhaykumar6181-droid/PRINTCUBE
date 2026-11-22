@@ -1,0 +1,51 @@
+name: Build PRINT CUBE
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "generate.mjs"
+      - "Godrays - 01.jpg"
+      - "Dither Gradient - 07.png"
+      - ".github/workflows/printcube-build.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-project:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Verify generator and visual assets
+        run: |
+          test -f generate.mjs
+          test -f "Godrays - 01.jpg"
+          test -f "Dither Gradient - 07.png"
+
+      - name: Generate PRINT CUBE project
+        run: node generate.mjs
+
+      - name: Commit generated project
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add print3d
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit."
+          else
+            git commit -m "Build PRINT CUBE website"
+            git push
+          fi
